@@ -8,7 +8,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy to LeanEngine
-      uses: enflo/curl-action@v1.2
-      with:
-        curl: -X POST https://${{ secrets.SITE_URL }}/1.1/engine/groups/web/production/version?gitTag=${{ github.sha }}&token=${{ secrets.DEPLOY_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Waking  #读取站点信息
+        run: | 
+          echo `date +"%Y-%m-%d %H:%M:%S"` begin > time.log
+      - name: Commit #更新日志到GitHub仓库
+        run: |
+          git config --global user.email AutoWakeUp@email.com
+          git config --global user.name AutoWakeUp
+          git add .
+          git commit -m "Successfully Wake" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to LeanEngine
+        uses: enflo/curl-action@v1.2
+        with:
+          curl: -X POST https://${{ secrets.SITE_URL }}/1.1/engine/groups/web/production/version?gitTag=${{ github.sha }}&token=${{ secrets.DEPLOY_TOKEN }}
